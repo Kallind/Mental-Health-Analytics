@@ -4,7 +4,7 @@ import os
 
 
 st.set_page_config(layout="wide",initial_sidebar_state="collapsed")
-st.header("Data Visucalisation without Data Cleaning")
+st.header("Data Visualisation without Data Cleaning")
 st.write("This is the second page. Click the button below to go back to the main page.")
 
 col1, col2 = st.columns(2)
