@@ -1,6 +1,17 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 import os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn import preprocessing
+from sklearn import metrics
+import plotly.graph_objects as go
+import plotly.express as px
+from plotly.subplots import make_subplots
+import warnings
+warnings.filterwarnings("ignore")
 
 st.set_page_config(layout="wide",initial_sidebar_state="collapsed")
 st.header("Data Visualisation with Data Cleaning")
