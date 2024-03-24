@@ -19,9 +19,37 @@ st.write("This is the third page. Click the button below to go back to the main 
 
 col1, col2 = st.columns(2)
 
-with col1: 
-    st.write("Data")
-    st.write("Graphs")
+with col1:
+    excel_file = pd.ExcelFile("mentalall.xlsx") 
+    dfs = pd.read_excel(excel_file, sheet_name=['1', '4','6','7']) 
+
+    import streamlit as st
+    import pandas as pd
+    import plotly.express as px
+
+    class Color:
+        BLUE = "<span style='color: blue;'>"
+        BOLD = "<span style='font-weight: bold;'>"
+        UNDERLINE = "<span style='text-decoration: underline;'>"
+        END = "</span>"
+
+# Read data from the desired sheet
+df = excel_file.parse("4")
+# Sort DataFrame by "Major depression"
+df.sort_values(by="Major depression", inplace=True)
+# Define Streamlit app
+st.title("Visualization of Major Depression")
+# Create a bar chart using Plotly Express
+fig = px.bar(df, x="Major depression", y="Entity", orientation='h', color='Bipolar disorder')
+# Display the chart
+st.plotly_chart(fig)
+
+
+df2.sort_values(by= "Eating disorders" ,inplace=True)
+plt.figure(dpi=200)
+fig = px.bar(df2, x="Eating disorders", y="Entity", orientation='h',color='Dysthymia')
+fig.show()
+
 with col2:
     st.write("Graphs")
     st.write("Graphs")
