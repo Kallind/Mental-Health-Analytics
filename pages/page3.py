@@ -20,51 +20,77 @@ st.write("This is the third page. Click the button below to go back to the main 
 col1, col2 = st.columns(2)
 
 with col1:
-    excel_file = pd.ExcelFile("mentalall.xlsx") 
-    dfs = pd.read_excel(excel_file, sheet_name=['1', '4','6','7']) 
-
     import streamlit as st
     import pandas as pd
-    import plotly.express as px
+    import plotly.graph_objects as go
 
-    class Color:
-        BLUE = "<span style='color: blue;'>"
-        BOLD = "<span style='font-weight: bold;'>"
-        UNDERLINE = "<span style='text-decoration: underline;'>"
-        END = "</span>"
+def main():
+    # Load data
+    df = pd.read_csv('mental_cleaned.csv')
+    df.columns = ['Country', 'Code', 'Year', 'Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']
+    # Streamlit App
+    st.title("Global Mental Health Disorders Prevalence")
+    # Select Year
+    year_of_interest = st.slider("Select Year", min_value=int(df['Year'].min()), max_value=int(df['Year'].max()), value=2010)
+    # Filter data for selected year
+    data_filtered = df[df['Year'] == year_of_interest]
+    # List of disorders to include in the dropdown
+    disorders = ['Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']
+    # Initialize figure
+    fig = go.Figure()
+    # Add traces, one for each disorder
+    for disorder in disorders:
+        fig.add_trace(
+            go.Choropleth(
+                locations = data_filtered['Code'],
+                z = data_filtered[disorder],
+                text = data_filtered['Country'],
+                colorscale = 'Viridis',
+                autocolorscale=False,
+                reversescale=True,
+                marker_line_color='darkgray',
+                marker_line_width=0.5,
+                colorbar_tickprefix = '%',
+                colorbar_title = 'Prevalence<br>Rate',
+                visible = (disorder == disorders[0])  # Only the first disorder is visible initially
+            )
+        )
+    # Make dropdowns
+    buttons = []
 
-# Read data from the desired sheet
-df = excel_file.parse("4")
-# Sort DataFrame by "Major depression"
-df.sort_values(by="Major depression", inplace=True)
-# Define Streamlit app
-st.title("Visualization of Major Depression")
-# Create a bar chart using Plotly Express
-fig = px.bar(df, x="Major depression", y="Entity", orientation='h', color='Bipolar disorder')
-# Display the chart
-st.plotly_chart(fig)
+    for i, disorder in enumerate(disorders):
+        button = dict(
+            label=disorder,
+            method="update",
+            args=[{"visible": [False] * len(disorders)},
+                  {"title": f"Global Prevalence of {disorder} in {year_of_interest}"}])
+        button["args"][0]["visible"][i] = True  # Toggle i'th trace to "visible"
+        buttons.append(button)
+    fig.update_layout(
+        updatemenus=[
+            go.layout.Updatemenu(
+                buttons=buttons,
+                direction="down",
+                pad={"r": 10, "t": 10},
+                showactive=True,
+                x=0.1,
+                xanchor="left",
+                y=1.15,
+                yanchor="top"
+            ),
+        ],
+        title_text=f"Global Prevalence of {disorders[0]} in {year_of_interest}",
+        geo=dict(
+            showframe=False,
+            showcoastlines=False,
+            projection_type='equirectangular'
+        )
+    )
+    # Plotly chart in Streamlit
+    st.plotly_chart(fig)
+if __name__ == "__main__":
+    main()
 
-
-df.sort_values(by="Eating disorders", inplace=True)
-# Define Streamlit app
-st.title("Visualization of Eating DIsorder")
-# Create a bar chart using Plotly Express
-fig = px.bar(df, x="Eating disorders", y="Entity", orientation='h', color='Dysthymia')
-# Display the chart
-st.plotly_chart(fig)
-
-df2 = excel_file.parse("4")
-# Replace "<0.1" with 0.1 and convert column to float
-df2.replace(to_replace="<0.1", value=0.1, regex=True, inplace=True)
-df2['Schizophrenia'] = df2['Schizophrenia'].astype(float)
-# Sort DataFrame by "Schizophrenia"
-df2.sort_values(by="Schizophrenia", inplace=True)
-# Define Streamlit app
-st.title("Visualization of Schizophrenia")
-# Create a bar chart using Plotly Express
-fig = px.bar(df2, x="Schizophrenia", y="Entity", orientation='h', color='Anxiety disorders')
-# Display the chart
-st.plotly_chart(fig)
 
 with col2:
     import streamlit as st
