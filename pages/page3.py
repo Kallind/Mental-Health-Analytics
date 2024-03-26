@@ -84,6 +84,18 @@ def main1():
     # Plotly chart in Streamlit
     st.plotly_chart(fig)
 
+####Heatmap
+    df1_variables = df[['Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']]
+
+    # Calculate correlation matrix
+    Corrmat = df1_variables.corr()
+
+    # Plot the heatmap
+    plt.figure(figsize=(10, 5), dpi=200)
+    sns.heatmap(Corrmat, annot=True, fmt=".2f", linewidth=.5)
+
+
+
 
 ##LINE PLOT
 
