@@ -92,6 +92,70 @@ if __name__ == "__main__":
     main()
 
 
+##LINE PLOT
+
+def main():
+    # Load the dataset (adjust the path as necessary)
+    data = pd.read_csv('mental_cleaned.csv')
+
+    # Sample structure adjustment if necessary (ensure the dataset is loaded correctly)
+    data.columns = ['Entity', 'Code', 'Year', 'Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']
+
+    data['Year'] = pd.to_numeric(data['Year'], errors='coerce')
+    data = data.dropna(subset=['Year'])
+    data['Year'] = data['Year'].astype(int)
+
+    # Sort the data by year
+    data = data.sort_values('Year')
+    
+    # Create a list of all unique countries/entities in the dataset
+    countries = data['Entity'].unique()
+
+    # Initialize the figure
+    fig = go.Figure()
+
+    # Placeholder for the initial plot (optional: choose a default country or the first in the list)
+    default_country = countries[0]
+    default_data = data[data['Entity'] == default_country]
+
+    # Add a line for each disorder for the default country
+    for disorder in ['Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']:
+        fig.add_trace(go.Scatter(x=default_data['Year'], y=default_data[disorder], mode='lines', name=disorder))
+
+    # Create dropdown menus
+    buttons = []
+
+    for country in countries:
+        country_data = data[data['Entity'] == country]
+        country_buttons = dict(label=country,
+                               method='update',
+                               args=[{'y': [country_data[disorder].values for disorder in
+                                            ['Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders',
+                                             'Bipolar disorder', 'Eating disorders']],
+                                      'x': [country_data['Year'].values] * 5,
+                                      'labels': ['Schizophrenia disorders', 'Depressive disorders',
+                                                 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']}])
+        buttons.append(country_buttons)
+
+    buttons.sort(key=lambda x: x['label'])  # Sort buttons alphabetically by country name
+
+    # Add dropdown to the figure
+    fig.update_layout(showlegend=True,
+                      updatemenus=[{"buttons": buttons, "direction": "down", "active": 0, "showactive": True,
+                                    "x": 0.1, "xanchor": "left", "y": 1.1, "yanchor": "top"}])
+
+    # Update layout to add titles and axis labels
+    fig.update_layout(title='Prevalence of Mental Health Disorders Over Time by Country',
+                      xaxis_title='Year',
+                      yaxis_title='Prevalence (%)')
+
+    # Display the plot
+    st.plotly_chart(fig)
+
+if __name__ == "__main__":
+    main()
+
+
 with col2:
     st.write("This is column 2")
     st.write("This is the data visualisation page")
