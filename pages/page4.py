@@ -16,6 +16,8 @@ from sklearn.cluster import KMeans
 import plotly.express as px
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import linkage
 
 st.set_page_config(layout="wide",initial_sidebar_state="collapsed")
 st.title("Data Modelling")
@@ -50,7 +52,7 @@ def preprocessing():
 
     df1_ent = df1.drop(["Entity", "Year"], axis=1)
     df = df1_ent.groupby('Code').mean()
-
+    
     new_column_names = {
         'Schizophrenia disorders (share of population) - Sex: Both - Age: Age-standardized': 'Schizophrenia',
         'Depressive disorders (share of population) - Sex: Both - Age: Age-standardized': 'Depressive',
@@ -67,23 +69,50 @@ def preprocessing():
 
     cols = df.columns
     cluster_data = pd.DataFrame(scaled_data, columns=[cols], index=df.index)
-
     return scaled_data,df,cluster_data
+    
 
+def hierarchical_clustering(df):
+    st.title('Hierarchical Clustering and Visualization')
+    x_variable = st.selectbox('Select X Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=0)
+    y_variable = st.selectbox('Select Y Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=1)
 
+    #df=df.drop(['Code'],axis=1)
+    # Perform hierarchical clustering
+    linked = linkage(df, method='ward')
+
+    from sklearn.cluster import AgglomerativeClustering
+# Perform agglomerative clustering
+    num_clusters = 2
+    agg_clustering = AgglomerativeClustering(n_clusters=num_clusters, linkage='ward')
+    cluster_data['Cluster'] = agg_clustering.fit_predict(cluster_data)
+    
+    # Plot the dendrogram
+    st.subheader('Hierarchical Clustering Dendrogram')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    dendrogram(linked, orientation='top', distance_sort='descending', show_leaf_counts=False, ax=ax)
+    plt.title('Hierarchical Clustering Dendrogram')
+    plt.xlabel('Sample Index')
+    plt.ylabel('Distance')
+    st.pyplot(fig)
+
+    # Display the clustered data interactively using Plotly Express
+    st.subheader('Clustered Data Visualization')
+    fig = px.scatter(df, x=x_variable, y=y_variable, color='Cluster', title=f'{x_variable} vs {y_variable}', height=600)
+    st.plotly_chart(fig)
 
 with col1: 
 
     st.header("Select one from below")
 
     # Define options for the dropdown
-    options = ["KMeans", "Clustering", "DBscan"]
+    options = ["KMeans", "Hierarchical", "DBscan"]
 
     # Create the dropdown widget
     selected_option = st.selectbox("Select an option:", options)
 
     if selected_option == "KMeans":
-        k = st.sidebar.slider("Number of clusters (k)", min_value=2, max_value=10, value=3, step=1)
+        k = st.slider("Number of clusters (k)", min_value=2, max_value=10, value=3, step=1)
         st.write(f"Selected Algorithm: {selected_option}")
         st.write(f"Number of Clusters (k): {k}")
         scaled_df,df,cluster_data=preprocessing()
@@ -99,10 +128,10 @@ with col1:
         # Call function to run DBSCAN algorithm with selected parameters
 
     elif selected_option == "Hierarchical":
-        linkage = st.sidebar.selectbox("Linkage Method", ["single", "complete", "average"])
         st.write(f"Selected Algorithm: {selected_option}")
         st.write(f"Linkage Method: {linkage}")
-
+        scaled_data,df,cluster_data=preprocessing()
+        hierarchical_clustering(df)
         # Display the selected option
         st.write("You selected:", selected_option)
 
