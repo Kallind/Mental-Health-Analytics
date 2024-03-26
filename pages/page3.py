@@ -19,12 +19,7 @@ st.write("This is the third page. Click the button below to go back to the main 
 
 col1, col2 = st.columns(2)
 
-with col1:
-    import streamlit as st
-    import pandas as pd
-    import plotly.graph_objects as go
-
-def main():
+def main1():
     # Load data
     df = pd.read_csv('mental_cleaned.csv')
     df.columns = ['Country', 'Code', 'Year', 'Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']
@@ -88,22 +83,29 @@ def main():
     )
     # Plotly chart in Streamlit
     st.plotly_chart(fig)
-if __name__ == "__main__":
-    main()
 
 
 ##LINE PLOT
 
-def main():
+def main2():
     # Load the dataset (adjust the path as necessary)
     data = pd.read_csv('mental_cleaned.csv')
 
     # Sample structure adjustment if necessary (ensure the dataset is loaded correctly)
     data.columns = ['Entity', 'Code', 'Year', 'Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']
 
+    # Convert 'Year' column to numeric, handling errors by coercing to NaN
     data['Year'] = pd.to_numeric(data['Year'], errors='coerce')
+
+    # Drop rows where 'Year' is NaN
     data = data.dropna(subset=['Year'])
+
+    # Convert 'Year' column to integer
     data['Year'] = data['Year'].astype(int)
+
+    # Ensure numerical columns have appropriate data types
+    numerical_columns = ['Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']
+    data[numerical_columns] = data[numerical_columns].apply(pd.to_numeric, errors='coerce')
 
     # Sort the data by year
     data = data.sort_values('Year')
@@ -152,11 +154,15 @@ def main():
     # Display the plot
     st.plotly_chart(fig)
 
-if __name__ == "__main__":
-    main()
+
+
+with col1:
+   main1()
+
 
 
 with col2:
+    main2()
     st.write("This is column 2")
     st.write("This is the data visualisation page")
 
