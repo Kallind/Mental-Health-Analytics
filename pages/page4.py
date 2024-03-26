@@ -21,29 +21,7 @@ st.set_page_config(layout="wide",initial_sidebar_state="collapsed")
 st.title("Data Modelling")
 
 col1, col2 = st.columns(2)
-def kmeans():
-    df1 = pd.read_csv("mental_cleaned.csv")
-
-    df1_ent=df1.drop(["Entity","Year"],axis=1)
-    df=df1_ent.groupby('Code').mean()
-
-    new_column_names = {
-        'Schizophrenia disorders (share of population) - Sex: Both - Age: Age-standardized': 'Schizophrenia',
-        'Depressive disorders (share of population) - Sex: Both - Age: Age-standardized': 'Depressive',
-        'Anxiety disorders (share of population) - Sex: Both - Age: Age-standardized': 'Anxiety',
-        'Bipolar disorders (share of population) - Sex: Both - Age: Age-standardized': 'Bipolar',
-        'Eating disorders (share of population) - Sex: Both - Age: Age-standardized': 'Eating'
-    }
-
-    # Rename columns
-    df.rename(columns=new_column_names, inplace=True)
-
-    sc = StandardScaler()
-    scaled_data = sc.fit_transform(df)
-
-    cols = df.columns
-    cluster_data= pd.DataFrame(scaled_data, columns=[cols],index=df.index)
-
+def kmeans(scaled_data,df,cluster_data):
     # elbow plot
     inertia = []
     for i in range(1, 11):
@@ -64,6 +42,36 @@ def kmeans():
     fig1 = px.scatter(df1, x='Schizophrenia', y='Depressive', color='Cluster', title='Schizophrenia vs Depressive', height=600, hover_data=['Code'])
     st.plotly_chart(fig1)
 
+def preprocessing():
+    st.title('Data Preprocessing')
+
+    # Load data
+    df1 = pd.read_csv("mental_cleaned.csv")
+
+    df1_ent = df1.drop(["Entity", "Year"], axis=1)
+    df = df1_ent.groupby('Code').mean()
+
+    new_column_names = {
+        'Schizophrenia disorders (share of population) - Sex: Both - Age: Age-standardized': 'Schizophrenia',
+        'Depressive disorders (share of population) - Sex: Both - Age: Age-standardized': 'Depressive',
+        'Anxiety disorders (share of population) - Sex: Both - Age: Age-standardized': 'Anxiety',
+        'Bipolar disorders (share of population) - Sex: Both - Age: Age-standardized': 'Bipolar',
+        'Eating disorders (share of population) - Sex: Both - Age: Age-standardized': 'Eating'
+    }
+
+    # Rename columns
+    df.rename(columns=new_column_names, inplace=True)
+
+    sc = StandardScaler()
+    scaled_data = sc.fit_transform(df)
+
+    cols = df.columns
+    cluster_data = pd.DataFrame(scaled_data, columns=[cols], index=df.index)
+
+    return scaled_data,df,cluster_data
+
+
+
 with col1: 
 
     st.header("Select one from below")
@@ -78,8 +86,8 @@ with col1:
         k = st.sidebar.slider("Number of clusters (k)", min_value=2, max_value=10, value=3, step=1)
         st.write(f"Selected Algorithm: {selected_option}")
         st.write(f"Number of Clusters (k): {k}")
-        
-        kmeans()
+        scaled_df,df,cluster_data=preprocessing()
+        kmeans(scaled_df,df,cluster_data)
     
 
     elif selected_option == "DBSCAN":
