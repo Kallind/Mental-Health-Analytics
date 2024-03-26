@@ -70,10 +70,6 @@ def plot_outliers(df, disorder):
     )
     return fig
 
-# Load and clean data
-file_path = 'asli_tatti.csv'
-df = load_and_clean_data(file_path)
-
 # Main Page
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 st.header("Data Visualisation without Data Cleaning")
@@ -91,41 +87,3 @@ with col2:
 
 if st.button("Clean Data and Visualize Data"):
     switch_page("page3")
-
-# Page 3
-st.page("page3")
-
-st.subheader("Data Analysis Dashboard")
-
-analysis_type = st.sidebar.selectbox('Select Analysis Type', ['Heatmap', 'Missing Values', 'Outliers'])
-
-if analysis_type == 'Heatmap':
-    st.subheader('Data Availability Heatmap for Selected Disorder')
-    selected_disorder = st.selectbox('Select Disorder', df.columns[3:])
-    heatmap_data = create_heatmap(df, selected_disorder)
-
-    # Plot heatmap
-    fig = go.Figure(data=go.Heatmap(
-        z=heatmap_data.values,
-        x=heatmap_data.columns,
-        y=heatmap_data.index,
-        colorscale='Viridis'
-    ))
-    fig.update_layout(
-        xaxis=dict(title='Year', side="top"),
-        yaxis=dict(title='Entity'),
-        width=1000,
-        height=550,
-    )
-    st.plotly_chart(fig)
-
-elif analysis_type == 'Missing Values':
-    st.subheader('Yearly Missing Values Across All Disorders')
-    fig = plot_missing_values(df)
-    st.plotly_chart(fig)
-
-elif analysis_type == 'Outliers':
-    st.subheader('Prevalence Data and Outliers')
-    selected_disorder = st.selectbox('Select Disorder', df.columns[3:])
-    fig = plot_outliers(df, selected_disorder)
-    st.plotly_chart(fig)
