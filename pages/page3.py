@@ -23,17 +23,22 @@ def main1():
     # Load data
     df = pd.read_csv('mental_cleaned.csv')
     df.columns = ['Country', 'Code', 'Year', 'Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']
+
     # Streamlit App
     st.markdown("<div style='text-align: center; font-size: 30px;'>Global Mental Health Disorders Prevalence</div>", unsafe_allow_html=True)
 
     # Select Year
     year_of_interest = st.slider("Select Year", min_value=int(df['Year'].min()), max_value=int(df['Year'].max()), value=2010)
+
     # Filter data for selected year
     data_filtered = df[df['Year'] == year_of_interest]
+
     # List of disorders to include in the dropdown
     disorders = ['Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']
+
     # Initialize figure
     fig = go.Figure()
+
     # Add traces, one for each disorder
     for disorder in disorders:
         fig.add_trace(
@@ -51,6 +56,7 @@ def main1():
                 visible = (disorder == disorders[0])  # Only the first disorder is visible initially
             )
         )
+
     # Make dropdowns
     buttons = []
 
@@ -59,9 +65,10 @@ def main1():
             label=disorder,
             method="update",
             args=[{"visible": [False] * len(disorders)},
-                  {"title": f"Global Prevalence of {disorder} in {year_of_interest}"}])
+                {"title": f"Global Prevalence of {disorder} in {year_of_interest}"}])
         button["args"][0]["visible"][i] = True  # Toggle i'th trace to "visible"
         buttons.append(button)
+
     fig.update_layout(
         updatemenus=[
             go.layout.Updatemenu(
@@ -69,8 +76,8 @@ def main1():
                 direction="down",
                 pad={"r": 10, "t": 10},
                 showactive=True,
-                x=0.1,
-                xanchor="left",
+                x=0.5,  # Center align the dropdown
+                xanchor="center",  # Anchor point for x-coordinate
                 y=1.15,
                 yanchor="top"
             ),
@@ -80,10 +87,14 @@ def main1():
             showframe=False,
             showcoastlines=False,
             projection_type='equirectangular'
-        )
+        ),
+        # Max width and center aligned
+        width=900,
+        margin=dict(l=0, r=0, t=50, b=0),  # Adjust margins to center align
     )
+
     # Plotly chart in Streamlit
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True) 
 
 ####Heatmap
     df1_variables = df[['Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']]
@@ -153,20 +164,24 @@ def main2():
         buttons.append(country_buttons)
 
     buttons.sort(key=lambda x: x['label'])  # Sort buttons alphabetically by country name
+
     st.markdown("<div style='text-align: center; font-size: 30px;'>Prevalence of Mental Health Disorders Over Time by Country</div>", unsafe_allow_html=True)
 
     # Add dropdown to the figure
     fig.update_layout(showlegend=True,
                       updatemenus=[{"buttons": buttons, "direction": "down", "active": 0, "showactive": True,
-                                    "x": 0.1, "xanchor": "left", "y": 1.1, "yanchor": "top"}])
+                                    "x": 0.5, "xanchor": "center", "y": 1.1, "yanchor": "top"}])  # Center align dropdown
 
-    # Update layout to add titles and axis labels
+    # Update layout to add titles and axis labels, and adjust width
     fig.update_layout(
                       xaxis_title='Year',
-                      yaxis_title='Prevalence (%)')
+                      yaxis_title='Prevalence (%)',
+                      width=900  # Adjust the width as per your requirement
+                      )
 
     # Display the plot
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
+
 
      
 def main3():
@@ -205,10 +220,10 @@ main1()
 main2()
 main3()
 
-
-    
-    
-
+##BUTTON
+# Enlarge and center-align the button using CSS styling
+button_style = "<style>div[data-testid='stButton']>button {width: 200px !important; height: 50px !important; text-align: center !important; margin: auto !important;}</style>"
+st.markdown(button_style, unsafe_allow_html=True)
 
 if st.button("Modelling Button"):
     switch_page("page4")
