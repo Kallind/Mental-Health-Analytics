@@ -52,7 +52,18 @@ def summarize_clustering(df, variable_of_interest,cluster_column='Cluster'):
         summary += summary_stats.to_string()
         summary += f"The data is: {df[[variable_of_interest[0],variable_of_interest[1] ]]}"
         return summary
+def metrics_gemini(silhouette, davies_bouldin,calinski_harabasz):
+        summary = f"Silhouette Coefficient: {silhouette}" +f"Davies-Bouldin Index: {davies_bouldin}" + f"Calinski-Harabasz Index: {calinski_harabasz}"
+        summary += 'given are the performance metrics of clustering data. I want inference regarding the same in genral terms'
+        genai.configure(api_key= 'AIzaSyADzCNl6bP8s-G4tIyeEcrwpMPEvvL2bh0')  # Assuming API key for genai
+        model = genai.GenerativeModel('gemini-pro')  # Assuming 'gemini-pro' is the Gemini model
 
+        # Call Gemini API using genai (replace with actual call based on genai's capabilities)
+        inferences = model.generate_content(summary)
+        # Process and format inferences (replace with logic to handle genai response)
+        insights = inferences
+        insights = insights.candidates[0].content.parts[0].text
+        return insights
 import google.generativeai as genai
 import os
 
@@ -77,7 +88,7 @@ def generate_insights(df, variables_of_interest, cluster_column='Cluster', gemin
             insights = inferences
             insights = insights.candidates[0].content.parts[0].text
 
-            return f"Generated Insights based on Gemini Analysis:\n{insights}"
+            return insights
         except Exception as e:
             print(f"Error using genai library: {e}")
             return "Failed to generate insights using Gemini API."
@@ -113,12 +124,12 @@ def kmeans(scaled_data,df,cluster_data,k):
 
     #inferencing
     st.subheader('Cluster Inferencing')
-    import pandas as pd
 
     
 
     st.write(generate_insights(df, (x_variable,y_variable), 'Cluster', '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'))
-    return silhouette,davies_bouldin,calinski_harabasz
+    perf_insight = metrics_gemini(silhouette,davies_bouldin, calinski_harabasz)
+    return silhouette,davies_bouldin,calinski_harabasz, perf_insight
 
     # Example usage, replace 'your_dataframe' with your actual DataFrame variable
     # generate_insights(your_dataframe, ['Schizophrenia', 'Depressive'], 'Cluster', 'your_openai_api_key_here')
@@ -151,6 +162,7 @@ def preprocessing():
 
     cols = df.columns
     cluster_data = pd.DataFrame(scaled_data, columns=[cols], index=df.index)
+    
     return scaled_data,df,cluster_data
     
 
@@ -187,7 +199,9 @@ def hierarchical_clustering(df):
     st.plotly_chart(fig)
     insight = generate_insights(df, (x_variable,y_variable), 'Cluster', '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')
     st.write(insight)
-    return silhouette,davies_bouldin,calinski_harabasz
+    perf_insight = metrics_gemini(silhouette,davies_bouldin, calinski_harabasz)
+
+    return silhouette,davies_bouldin,calinski_harabasz,perf_insight
 
 
 ##DBScan
@@ -210,46 +224,11 @@ def dbscan(df, best_eps, best_min_samples):
     insight = generate_insights(df, (x_variable,y_variable), 'DBCluster', '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')
     st.plotly_chart(fig)
     st.write(insight)
-    # Define plot configurations
-    # plot_config = [
-    #     ('Schizophrenia', 'Depressive'),
-    #     ('Depressive', 'Anxiety'),
-    #     ('Anxiety', 'Bipolar'),
-    #     ('Bipolar', 'Eating'),
-    #     ('Eating', 'Schizophrenia')
-    # ]
 
-    # # Create subplots
-    # fig = make_subplots(rows=5, cols=2, subplot_titles=[
-    #     'Schizophrenia vs Depressive Without Clustering', 'Schizophrenia vs Depressive With Clustering',
-    #     'Depressive vs Anxiety Without Clustering', 'Depressive vs Anxiety With Clustering',
-    #     'Anxiety vs Bipolar Without Clustering', 'Anxiety vs Bipolar With Clustering',
-    #     'Bipolar vs Eating Without Clustering', 'Bipolar vs Eating With Clustering',
-    #     'Eating vs Schizophrenia Without Clustering', 'Eating vs Schizophrenia With Clustering'
-    # ])
-
-    # # Plotting
-    # for i, (x, y) in enumerate(plot_config, start=1):
-    #     # Without clustering
-    #     fig.add_trace(
-    #         go.Scatter(x=df[x], y=df[y], mode='markers', name=f'{x} vs {y} Without Clustering'),
-    #         row=i, col=1
-    #     )
-    #     # With clustering
-    #     fig.add_trace(
-    #         go.Scatter(x=df[x], y=df[y], mode='markers', name=f'{x} vs {y} With Clustering',
-    #                    marker=dict(color=labels_dB),
-    #                    text=df['DBCluster'].apply(lambda label: f'Cluster: {label}')),
-    #         row=i, col=2
-    #     )
-
-    # # Update layout
-    # fig.update_layout(height=1500, width=1000, showlegend=False, title_text='DBSCAN Clustering Plots')
-
-    # Show the figure
     
-    #st.write(generate_insights(df, (x_va,'Depressive'), 'DBCluster', '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'))
-    return silhouette,davies_bouldin,calinski_harabasz
+
+    perf_insight = metrics_gemini(silhouette,davies_bouldin, calinski_harabasz)
+    return silhouette,davies_bouldin,calinski_harabasz, perf_insight
 
 
     
@@ -270,11 +249,12 @@ with col1:
         k = st.slider("Number of clusters (k)", min_value=2, max_value=10, value=3, step=1)
         st.write(f"Number of Clusters (k): {k}")
         scaled_df,df,cluster_data=preprocessing()
-        silhouette,davies_bouldin,calinski_harabasz=kmeans(scaled_df,df,cluster_data,k)
+        silhouette,davies_bouldin,calinski_harabasz, inference=kmeans(scaled_df,df,cluster_data,k)
         st.title("Performance Metrics")
         st.write(f"Silhouette Coefficient: {silhouette}")
         st.write(f"Davies-Bouldin Index: {davies_bouldin}")
         st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
+        st.write(f"Inference\n {inference}")
         
 
     
@@ -286,22 +266,28 @@ with col1:
         st.write(f"Epsilon (eps): {eps}")
         st.write(f"Minimum Samples: {min_samples}")
         scaled_df,df,cluster_data=preprocessing()
-        silhouette,davies_bouldin,calinski_harabasz= dbscan(df, eps, min_samples)
+        silhouette,davies_bouldin,calinski_harabasz,inference= dbscan(df, eps, min_samples)
         st.title("Performance Metrics")
         st.write(f"Silhouette Coefficient: {silhouette}")
         st.write(f"Davies-Bouldin Index: {davies_bouldin}")
         st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
+        st.write(f"Inference\n {inference}")
         # Call function to run DBSCAN algorithm with selected parameters
 
     elif selected_option == "Hierarchical":
         st.write(f"Selected Algorithm: {selected_option}")
         scaled_data,df,cluster_data=preprocessing()
-        silhouette,davies_bouldin,calinski_harabasz=hierarchical_clustering(df)
+        silhouette,davies_bouldin,calinski_harabasz, inference = hierarchical_clustering(df)
         # Display the selected option
         st.title("Performance Metrics")
         st.write(f"Silhouette Coefficient: {silhouette}")
         st.write(f"Davies-Bouldin Index: {davies_bouldin}")
         st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
+
+        st.write(f"Inference\n {inference}")
+        
+
+
 
 
 
