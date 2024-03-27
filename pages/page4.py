@@ -25,7 +25,7 @@ st.set_page_config(layout="wide",initial_sidebar_state="collapsed")
 st.title("Data Modelling")
 
 col1, col2 = st.columns(2)
-def kmeans(scaled_data,df,cluster_data):
+def kmeans(scaled_data,df,cluster_data,k):
     # elbow plot
     inertia = []
     for i in range(1, 11):
@@ -38,12 +38,15 @@ def kmeans(scaled_data,df,cluster_data):
     fig = px.line(x=range(1, 11), y=inertia, title='Elbow Plot', labels={'x': 'Number of Clusters', 'y': 'Inertia'})
     st.plotly_chart(fig)
 
-    kmeans = KMeans(n_clusters=4, random_state=0)
+    kmeans = KMeans(n_clusters=k, random_state=0)
     df['Cluster'] = kmeans.fit_predict(cluster_data)
 
+    x_variable = st.selectbox('Select X Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=0)
+    y_variable = st.selectbox('Select Y Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=1)
+ 
     df1 = df.reset_index()
     # Displaying the clustered data interactively using Plotly Express
-    fig1 = px.scatter(df1, x='Schizophrenia', y='Depressive', color='Cluster', title='Schizophrenia vs Depressive', height=600, hover_data=['Code'])
+    fig1 = px.scatter(df1, x=x_variable, y=y_variable, color='Cluster', title='Schizophrenia vs Depressive',color_discrete_map=px.colors.sequential.Plasma, height=600, hover_data=['Code'])
     st.plotly_chart(fig1)
 
 def preprocessing():
@@ -179,7 +182,7 @@ with col1:
         st.write(f"Selected Algorithm: {selected_option}")
         st.write(f"Number of Clusters (k): {k}")
         scaled_df,df,cluster_data=preprocessing()
-        kmeans(scaled_df,df,cluster_data)
+        kmeans(scaled_df,df,cluster_data,k)
     
 
     elif selected_option == "DBSCAN":
