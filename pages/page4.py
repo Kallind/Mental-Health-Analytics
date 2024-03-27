@@ -272,6 +272,6 @@ elif selected_option == "Hierarchical":
     st.write(f"Davies-Bouldin Index: {davies_bouldin}")
     st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
     st.write(f"Inference\n {inference}")
-if st.button("Testing Button"):
+if st.button("Model Comparison"):
     switch_page("page5")
 
