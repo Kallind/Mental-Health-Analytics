@@ -24,7 +24,7 @@ from scipy.cluster.hierarchy import linkage
 st.set_page_config(layout="wide",initial_sidebar_state="collapsed")
 st.title("Data Modelling")
 
-col1, col2 = st.columns(2)
+
 # def kmeans(scaled_data,df,cluster_data):
 #     # elbow plot
 #     inertia = []
@@ -101,7 +101,7 @@ def kmeans(scaled_data,df,cluster_data,k):
         inertia.append(kmeans.inertia_)
  # Plotting the elbow plot with plotly
     fig = px.line(x=range(1, 11), y=inertia, title='Elbow Plot', labels={'x': 'Number of Clusters', 'y': 'Inertia'})
-    st.plotly_chart(fig)
+    st.plotly_chart(fig,use_container_width=True)
  
     st.write("The elbow method in the provided plot is used to determine the optimal number of clusters (k) for k-means clustering by identifying the point at which the inertia (within-cluster sum of squares) begins to decrease more slowly. Inertia dramatically drops as the number of clusters increases and then levels off, indicating diminishing returns to adding more clusters. This point of inflection is the elbow.")
     st.write("In the provided plot, the elbow point appears to be at **k = 3**. This is where the rate of decrease in inertia shifts from being rapid to more gradual, suggesting that increasing the number of clusters beyond 3 will not result in significant improvements in the variance explained by the clusters. Therefore, **k = 3** is likely the optimal number for k-means clustering according to this elbow curve.")
@@ -119,8 +119,8 @@ def kmeans(scaled_data,df,cluster_data,k):
  
     df1 = df.reset_index()
     # Displaying the clustered data interactively using Plotly Express
-    fig1 = px.scatter(df1, x=x_variable, y=y_variable, color='Cluster', title='Schizophrenia vs Depressive',color_discrete_map=px.colors.sequential.Plasma, height=600, hover_data=['Code'])
-    st.plotly_chart(fig1)
+    fig1 = px.scatter(df1, x=x_variable, y=y_variable, color='Cluster', title='Schizophrenia vs Depressive',color_continuous_scale=px.colors.sequential.Viridis, height=800, hover_data=['Code'],width=1100)
+    st.plotly_chart(fig1,use_container_width=True)
 
     #inferencing
     st.subheader('Cluster Inferencing')
@@ -187,7 +187,7 @@ def hierarchical_clustering(df):
     plt.title('Hierarchical Clustering Dendrogram')
     plt.xlabel('Sample Index')
     plt.ylabel('Distance')
-    st.pyplot(fig)
+    st.pyplot(fig,use_container_width=True)
 
     x_variable = st.selectbox('Select X Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=0)
     y_variable = st.selectbox('Select Y Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=1)
@@ -195,8 +195,8 @@ def hierarchical_clustering(df):
  
     # Display the clustered data interactively using Plotly Express
     st.subheader('Clustered Data Visualization')
-    fig = px.scatter(df, x=x_variable, y=y_variable, color='Cluster', title=f'{x_variable} vs {y_variable}', height=600)
-    st.plotly_chart(fig)
+    fig = px.scatter(df, x=x_variable, y=y_variable, color='Cluster', title=f'{x_variable} vs {y_variable}', height=800,color_continuous_scale=px.colors.sequential.Viridis,width=1100)
+    st.plotly_chart(fig,use_container_width=True)
     insight = generate_insights(df, (x_variable,y_variable), 'Cluster', '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')
     st.write(insight)
     perf_insight = metrics_gemini(silhouette,davies_bouldin, calinski_harabasz)
@@ -220,9 +220,9 @@ def dbscan(df, best_eps, best_min_samples):
  
     # Display the clustered data interactively using Plotly Express
     st.subheader('Clustered Data Visualization')
-    fig = px.scatter(df, x=x_variable, y=y_variable, color='DBCluster', title=f'{x_variable} vs {y_variable}', height=600)
+    fig = px.scatter(df, x=x_variable, y=y_variable, color='DBCluster', title=f'{x_variable} vs {y_variable}', height=800,color_continuous_scale=px.colors.sequential.Viridis,width=1100)
     insight = generate_insights(df, (x_variable,y_variable), 'DBCluster', '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')
-    st.plotly_chart(fig)
+    st.plotly_chart(fig,use_container_width=True)
     st.write(insight)
 
     
@@ -231,58 +231,47 @@ def dbscan(df, best_eps, best_min_samples):
     return silhouette,davies_bouldin,calinski_harabasz, perf_insight
 
 
+st.header("Select one from below")
+# Define options for the dropdown
+options = ["KMeans", "Hierarchical", "DBSCAN"]
+# Create the dropdown widget
+selected_option = st.selectbox("Select an option:", options)
+if selected_option == "KMeans":
+    st.write(f"Selected Algorithm: {selected_option}")
+    k = st.slider("Number of clusters (k)", min_value=2, max_value=10, value=3, step=1)
+    st.write(f"Number of Clusters (k): {k}")
+    scaled_df,df,cluster_data=preprocessing()
+    silhouette,davies_bouldin,calinski_harabasz, inference=kmeans(scaled_df,df,cluster_data,k)
+    st.title("Performance Metrics")
+    st.write(f"Silhouette Coefficient: {silhouette}")
+    st.write(f"Davies-Bouldin Index: {davies_bouldin}")
+    st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
+    st.write(f"Inference\n {inference}")
     
-
-    
-with col1: 
-
-    st.header("Select one from below")
-
-    # Define options for the dropdown
-    options = ["KMeans", "Hierarchical", "DBSCAN"]
-
-    # Create the dropdown widget
-    selected_option = st.selectbox("Select an option:", options)
-
-    if selected_option == "KMeans":
-        st.write(f"Selected Algorithm: {selected_option}")
-        k = st.slider("Number of clusters (k)", min_value=2, max_value=10, value=3, step=1)
-        st.write(f"Number of Clusters (k): {k}")
-        scaled_df,df,cluster_data=preprocessing()
-        silhouette,davies_bouldin,calinski_harabasz, inference=kmeans(scaled_df,df,cluster_data,k)
-        st.title("Performance Metrics")
-        st.write(f"Silhouette Coefficient: {silhouette}")
-        st.write(f"Davies-Bouldin Index: {davies_bouldin}")
-        st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
-        st.write(f"Inference\n {inference}")
-        
-    elif selected_option == "DBSCAN":
-        eps = st.slider("Epsilon (eps)", min_value=0.1, max_value=2.0, value=0.5, step=0.1)
-        min_samples = st.slider("Minimum Samples", min_value=1, max_value=10, value=5, step=1)
-        st.write(f"Selected Algorithm: {selected_option}")
-        st.write(f"Epsilon (eps): {eps}")
-        st.write(f"Minimum Samples: {min_samples}")
-        scaled_df,df,cluster_data=preprocessing()
-        silhouette,davies_bouldin,calinski_harabasz,inference= dbscan(df, eps, min_samples)
-        st.title("Performance Metrics")
-        st.write(f"Silhouette Coefficient: {silhouette}")
-        st.write(f"Davies-Bouldin Index: {davies_bouldin}")
-        st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
-        st.write(f"Inference\n {inference}")
-        # Call function to run DBSCAN algorithm with selected parameters
-
-    elif selected_option == "Hierarchical":
-        st.write(f"Selected Algorithm: {selected_option}")
-        scaled_data,df,cluster_data=preprocessing()
-        silhouette,davies_bouldin,calinski_harabasz, inference = hierarchical_clustering(df)
-        # Display the selected option
-        st.title("Performance Metrics")
-        st.write(f"Silhouette Coefficient: {silhouette}")
-        st.write(f"Davies-Bouldin Index: {davies_bouldin}")
-        st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
-
-        st.write(f"Inference\n {inference}")
-
-    if st.button("Testing Button"):
-        switch_page("page5")
+elif selected_option == "DBSCAN":
+    eps = st.slider("Epsilon (eps)", min_value=0.1, max_value=2.0, value=0.5, step=0.1)
+    min_samples = st.slider("Minimum Samples", min_value=1, max_value=10, value=5, step=1)
+    st.write(f"Selected Algorithm: {selected_option}")
+    st.write(f"Epsilon (eps): {eps}")
+    st.write(f"Minimum Samples: {min_samples}")
+    scaled_df,df,cluster_data=preprocessing()
+    silhouette,davies_bouldin,calinski_harabasz,inference= dbscan(df, eps, min_samples)
+    st.title("Performance Metrics")
+    st.write(f"Silhouette Coefficient: {silhouette}")
+    st.write(f"Davies-Bouldin Index: {davies_bouldin}")
+    st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
+    st.write(f"Inference\n {inference}")
+    # Call function to run DBSCAN algorithm with selected parameters
+elif selected_option == "Hierarchical":
+    st.write(f"Selected Algorithm: {selected_option}")
+    scaled_data,df,cluster_data=preprocessing()
+    silhouette,davies_bouldin,calinski_harabasz, inference = hierarchical_clustering(df)
+    # Display the selected option
+    st.title("Performance Metrics")
+    st.write(f"Silhouette Coefficient: {silhouette}")
+    st.write(f"Davies-Bouldin Index: {davies_bouldin}")
+    st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
+    st.write(f"Inference\n {inference}")
+if st.button("Testing Button"):
+    switch_page("page5")
 
