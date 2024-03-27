@@ -19,6 +19,8 @@ with col1:
     st.write("What is Clustering?")
     st.write("When you're trying to learn about something, say music, one approach might be to look for meaningful groups or collections. You might organize music by genre, while your friend might organize music by decade. How you choose to group items helps you to understand more about them as individual pieces of music. You might find that you have a deep affinity for punk rock and further break down the genre into different approaches or music from different locations. On the other hand, your friend might look at music from the 1980's and be able to understand how the music across genres at that time was influenced by the sociopolitical climate. In both cases, you and your friend have learned something interesting about music, even though you took different approaches. In machine learning too, we often group examples as a first step to understand a subject (data set) in a machine learning system. Grouping unlabeled examples is called clustering.")
     st.write("Why Clustering in Mental Health?")
+    st.write("Why Clustering in Mental Health?")
+
 
 with col2:
     st.write("This is column 2")
