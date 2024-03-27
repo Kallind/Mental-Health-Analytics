@@ -75,6 +75,7 @@ def clustering_metrics_comparison():
 
     fig_bar.update_layout(barmode='group', title_text='Clustering Models Comparison')
 
+
     # Radar Chart
     fig_radar = px.line_polar(metrics_df, r=['Silhouette Score', 'Davies-Bouldin Index', 'Calinski-Harabasz Index'],
                               theta=['Silhouette Score', 'Davies-Bouldin Index', 'Calinski-Harabasz Index'],
@@ -82,13 +83,16 @@ def clustering_metrics_comparison():
 
     fig_radar.update_traces(fill='toself')
 
+    
     # Display the plots with bigger size and center alignment
     st.plotly_chart(fig_bar, use_container_width=True)
-    st.plotly_chart(fig_radar, use_container_width=True)
+    st.plotly_chart(fig_radar , use_container_width=True)
+
+    # st.plotly_chart(fig_radar, use_container_width=True)
 
     st.write(""" 
     **Conclusion** 
-     Considering the information from both the bar and radar charts, we can conclude:
+Considering the information from both the bar and radar charts, we can conclude:
  
 1. **K-means** stands out as the top performer:
    - It achieves the highest silhouette score, indicating well-separated clusters.
