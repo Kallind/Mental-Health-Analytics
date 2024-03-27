@@ -135,6 +135,7 @@ def kmeans(scaled_data,df,cluster_data,k):
 
             # Process and format inferences (replace with logic to handle genai response)
             insights = inferences
+            insights = insights.candidates[0].content.parts[0].text
 
             return f"Generated Insights based on Gemini Analysis:\n{insights}"
         except Exception as e:
