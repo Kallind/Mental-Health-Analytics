@@ -74,12 +74,12 @@ def kmeans(scaled_data,df,cluster_data,k):
     st.subheader('Cluster Inferencing')
     import pandas as pd
 
-    def summarize_clustering(df, cluster_column='Cluster'):
+    def summarize_clustering(df, variable_of_interest,cluster_column='Cluster'):
         num_clusters = df[cluster_column].nunique()
         summary_stats = df.groupby(cluster_column).agg(['mean', 'std', 'count'])
         summary = f"The dataset has been segmented into {num_clusters} clusters. Here's a summary of the data:\n\n"
         summary += summary_stats.to_string()
-        summary += f"The data is: {df}"
+        summary += f"The data is: {df[[variable_of_interest[0],variable_of_interest[1] ]]}"
         return summary
 
     # def create_chatgpt_prompt(data_summary, variables_of_interest):
@@ -119,7 +119,7 @@ def kmeans(scaled_data,df,cluster_data,k):
 
     def generate_insights(df, variables_of_interest, cluster_column='Cluster', gemini_api_key='your_gemini_api_key_here'):
     # Summarize clustering results (unchanged)
-        summary = summarize_clustering(df, cluster_column)
+        summary = summarize_clustering(df,variables_of_interest, cluster_column)
 
         # Prepare data for Gemini API (replace with your specific logic)
         data_for_gemini = summary + '.return a presentable inferece of the clustering data.'
@@ -142,7 +142,7 @@ def kmeans(scaled_data,df,cluster_data,k):
             print(f"Error using genai library: {e}")
             return "Failed to generate insights using Gemini API."
 
-    st.write(generate_insights(df, f'{x_variable} and {y_variable}', 'Cluster', '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'))
+    st.write(generate_insights(df, (x_variable,y_variable), 'Cluster', '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'))
     # Example usage, replace 'your_dataframe' with your actual DataFrame variable
     # generate_insights(your_dataframe, ['Schizophrenia', 'Depressive'], 'Cluster', 'your_openai_api_key_here')
 
