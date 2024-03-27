@@ -24,6 +24,6 @@ if uploaded_file is not None:
         
 
 with col2:
-    st.write("Inferencing")
-    st.write("Model Predictions")
+   if st.button("Performance matrix"):
+            switch_page("page6")
 
