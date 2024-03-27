@@ -61,6 +61,10 @@ def kmeans(scaled_data,df,cluster_data,k):
  
     kmeans = KMeans(n_clusters=k, random_state=0)
     df['Cluster'] = kmeans.fit_predict(cluster_data)
+    label = kmeans.labels_
+    silhouette = metrics.silhouette_score(df, label)
+    davies_bouldin = metrics.davies_bouldin_score(df, label)
+    calinski_harabasz = metrics.calinski_harabasz_score(df, label)
  
     x_variable = st.selectbox('Select X Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=0)
     y_variable = st.selectbox('Select Y Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=1)
@@ -69,6 +73,7 @@ def kmeans(scaled_data,df,cluster_data,k):
     # Displaying the clustered data interactively using Plotly Express
     fig1 = px.scatter(df1, x=x_variable, y=y_variable, color='Cluster', title='Schizophrenia vs Depressive',color_discrete_map=px.colors.sequential.Plasma, height=600, hover_data=['Code'])
     st.plotly_chart(fig1)
+    return silhouette,davies_bouldin,calinski_harabasz
 
     #inferencing
     st.subheader('Cluster Inferencing')
@@ -187,7 +192,10 @@ def hierarchical_clustering(df):
     num_clusters = 4
     agg_clustering = AgglomerativeClustering(n_clusters=num_clusters, linkage='ward')
     df['Cluster'] = agg_clustering.fit_predict(df)
- 
+    labels_dB = df['Cluster'].values
+    silhouette = metrics.silhouette_score(df, labels_dB)
+    davies_bouldin = metrics.davies_bouldin_score(df, labels_dB)
+    calinski_harabasz = metrics.calinski_harabasz_score(df,labels_dB)
     # Plot the dendrogram
     st.subheader('Hierarchical Clustering Dendrogram')
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -205,6 +213,7 @@ def hierarchical_clustering(df):
     st.subheader('Clustered Data Visualization')
     fig = px.scatter(df, x=x_variable, y=y_variable, color='Cluster', title=f'{x_variable} vs {y_variable}', height=600)
     st.plotly_chart(fig)
+    return silhouette,davies_bouldin,calinski_harabasz
 
 
 ##DBScan
@@ -213,6 +222,9 @@ def dbscan(df, best_eps, best_min_samples):
     dbscan = DBSCAN(eps=best_eps, min_samples=best_min_samples)
     df['DBCluster'] = dbscan.fit_predict(df)
     labels_dB = df['DBCluster'].values
+    silhouette = metrics.silhouette_score(df, labels_dB)
+    davies_bouldin = metrics.davies_bouldin_score(df, labels_dB)
+    calinski_harabasz = metrics.calinski_harabasz_score(df,labels_dB)
 
     # Define plot configurations
     plot_config = [
@@ -252,6 +264,7 @@ def dbscan(df, best_eps, best_min_samples):
 
     # Show the figure
     st.plotly_chart(fig)
+    return silhouette,davies_bouldin,calinski_harabasz
 
 
     
@@ -272,7 +285,13 @@ with col1:
         k = st.slider("Number of clusters (k)", min_value=2, max_value=10, value=3, step=1)
         st.write(f"Number of Clusters (k): {k}")
         scaled_df,df,cluster_data=preprocessing()
-        kmeans(scaled_df,df,cluster_data,k)
+        silhouette,davies_bouldin,calinski_harabasz=kmeans(scaled_df,df,cluster_data,k)
+        st.title("Performance Metrics")
+        st.write(f"Silhouette Coefficient: {silhouette}")
+        st.write(f"Davies-Bouldin Index: {davies_bouldin}")
+        st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
+        
+
     
 
     elif selected_option == "DBSCAN":
@@ -282,15 +301,22 @@ with col1:
         st.write(f"Epsilon (eps): {eps}")
         st.write(f"Minimum Samples: {min_samples}")
         scaled_df,df,cluster_data=preprocessing()
-        dbscan(df, eps, min_samples)
+        silhouette,davies_bouldin,calinski_harabasz= dbscan(df, eps, min_samples)
+        st.title("Performance Metrics")
+        st.write(f"Silhouette Coefficient: {silhouette}")
+        st.write(f"Davies-Bouldin Index: {davies_bouldin}")
+        st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
         # Call function to run DBSCAN algorithm with selected parameters
 
     elif selected_option == "Hierarchical":
         st.write(f"Selected Algorithm: {selected_option}")
         scaled_data,df,cluster_data=preprocessing()
-        hierarchical_clustering(df)
+        silhouette,davies_bouldin,calinski_harabasz=hierarchical_clustering(df)
         # Display the selected option
-        st.write("You selected:", selected_option)
+        st.title("Performance Metrics")
+        st.write(f"Silhouette Coefficient: {silhouette}")
+        st.write(f"Davies-Bouldin Index: {davies_bouldin}")
+        st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
 
 
 
