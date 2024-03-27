@@ -12,12 +12,14 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings("ignore")
-from sklearn.cluster import KMeans
+from sklearn.cluster import AgglomerativeClustering, KMeans
 import plotly.express as px
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from scipy.cluster.hierarchy import dendrogram
 from scipy.cluster.hierarchy import linkage
+
+
 
 st.set_page_config(layout="wide",initial_sidebar_state="collapsed")
 st.title("Data Modelling")
@@ -74,19 +76,15 @@ def preprocessing():
 
 def hierarchical_clustering(df):
     st.title('Hierarchical Clustering and Visualization')
-    x_variable = st.selectbox('Select X Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=0)
-    y_variable = st.selectbox('Select Y Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=1)
-
-    #df=df.drop(['Code'],axis=1)
+    
     # Perform hierarchical clustering
     linked = linkage(df, method='ward')
-
-    from sklearn.cluster import AgglomerativeClustering
-# Perform agglomerative clustering
-    num_clusters = 2
+ 
+    # Perform agglomerative clustering
+    num_clusters = 4
     agg_clustering = AgglomerativeClustering(n_clusters=num_clusters, linkage='ward')
-    cluster_data['Cluster'] = agg_clustering.fit_predict(cluster_data)
-    
+    df['Cluster'] = agg_clustering.fit_predict(df)
+ 
     # Plot the dendrogram
     st.subheader('Hierarchical Clustering Dendrogram')
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -96,11 +94,14 @@ def hierarchical_clustering(df):
     plt.ylabel('Distance')
     st.pyplot(fig)
 
+    x_variable = st.selectbox('Select X Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=0)
+    y_variable = st.selectbox('Select Y Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=1)
+ 
+ 
     # Display the clustered data interactively using Plotly Express
     st.subheader('Clustered Data Visualization')
     fig = px.scatter(df, x=x_variable, y=y_variable, color='Cluster', title=f'{x_variable} vs {y_variable}', height=600)
     st.plotly_chart(fig)
-
 with col1: 
 
     st.header("Select one from below")
@@ -129,7 +130,6 @@ with col1:
 
     elif selected_option == "Hierarchical":
         st.write(f"Selected Algorithm: {selected_option}")
-        st.write(f"Linkage Method: {linkage}")
         scaled_data,df,cluster_data=preprocessing()
         hierarchical_clustering(df)
         # Display the selected option
