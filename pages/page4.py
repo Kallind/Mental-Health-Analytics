@@ -256,9 +256,6 @@ with col1:
         st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
         st.write(f"Inference\n {inference}")
         
-
-    
-
     elif selected_option == "DBSCAN":
         eps = st.slider("Epsilon (eps)", min_value=0.1, max_value=2.0, value=0.5, step=0.1)
         min_samples = st.slider("Minimum Samples", min_value=1, max_value=10, value=5, step=1)
@@ -285,11 +282,6 @@ with col1:
         st.write(f"Calinski-Harabasz Index: {calinski_harabasz}")
 
         st.write(f"Inference\n {inference}")
-        
-
-
-
-
 
     with col2:
         st.write("Model Performance")
