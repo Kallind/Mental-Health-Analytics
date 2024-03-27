@@ -12,7 +12,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings("ignore")
-from sklearn.cluster import AgglomerativeClustering, KMeans
+from sklearn.cluster import DBSCAN, AgglomerativeClustering, KMeans
 import plotly.express as px
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -102,12 +102,74 @@ def hierarchical_clustering(df):
     st.subheader('Clustered Data Visualization')
     fig = px.scatter(df, x=x_variable, y=y_variable, color='Cluster', title=f'{x_variable} vs {y_variable}', height=600)
     st.plotly_chart(fig)
+
+
+    #   DBSCAN
+ 
+def dbscan(df, best_eps, best_min_samples):
+    # Scale the data
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(df)
+ 
+    # Perform DBSCAN clustering
+    dbscan = DBSCAN(eps=best_eps, min_samples=best_min_samples)
+    df['DBCluster'] = dbscan.fit_predict(scaled_data)
+    labels_dB = df['DBCluster'].values
+ 
+    # Define plot configurations
+    plot_config = [
+        ('Schizophrenia', 'Depressive'),
+        ('Depressive', 'Anxiety'),
+        ('Anxiety', 'Bipolar'),
+        ('Bipolar', 'Eating'),
+        ('Eating', 'Schizophrenia')
+    ]
+ 
+    # Create subplots
+    fig = make_subplots(rows=5, cols=2, subplot_titles=[
+        'Schizophrenia vs Depressive Without Clustering', 'Schizophrenia vs Depressive With Clustering',
+        'Depressive vs Anxiety Without Clustering', 'Depressive vs Anxiety With Clustering',
+        'Anxiety vs Bipolar Without Clustering', 'Anxiety vs Bipolar With Clustering',
+        'Bipolar vs Eating Without Clustering', 'Bipolar vs Eating With Clustering',
+        'Eating vs Schizophrenia Without Clustering', 'Eating vs Schizophrenia With Clustering'
+    ])
+ 
+    # Plotting
+    for i, (x, y) in enumerate(plot_config, start=1):
+        # Without clustering
+        fig.add_trace(
+            go.Scatter(x=df[x], y=df[y], mode='markers', name=f'{x} vs {y} Without Clustering'),
+            row=i, col=1
+        )
+        # With clustering
+        fig.add_trace(
+            go.Scatter(x=df[x], y=df[y], mode='markers', name=f'{x} vs {y} With Clustering', 
+                       marker=dict(color=labels_dB),hoveron=["Code"]),
+            row=i, col=2
+        )
+ 
+    # Update layout
+    fig.update_layout(height=1500, width=1000, showlegend=False, title_text='DBSCAN Clustering Plots')
+ 
+    # Show the figure
+    st.plotly_chart(fig)
+ 
+def main():
+    # Load your data here or pass it as an argument to the dbscan function
+    # df = pd.read_csv("your_data.csv")
+ 
+    # Create sliders for best_eps and best_min_samples
+    best_eps = st.slider("Select best_eps:", min_value=0.1, max_value=2.0, step=0.1, value=1.0)
+    best_min_samples = st.slider("Select best_min_samples:", min_value=1, max_value=10, step=1, value=5)
+ 
+    # Call dbscan function
+    # dbscan(df, best_eps, best_min_samples)
 with col1: 
 
     st.header("Select one from below")
 
     # Define options for the dropdown
-    options = ["KMeans", "Hierarchical", "DBscan"]
+    options = ["KMeans", "Hierarchical", "DBSCAN"]
 
     # Create the dropdown widget
     selected_option = st.selectbox("Select an option:", options)
@@ -121,11 +183,13 @@ with col1:
     
 
     elif selected_option == "DBSCAN":
-        eps = st.sidebar.slider("Epsilon (eps)", min_value=0.1, max_value=2.0, value=0.5, step=0.1)
-        min_samples = st.sidebar.slider("Minimum Samples", min_value=1, max_value=10, value=5, step=1)
+        eps = st.slider("Epsilon (eps)", min_value=0.1, max_value=2.0, value=0.5, step=0.1)
+        min_samples = st.slider("Minimum Samples", min_value=1, max_value=10, value=5, step=1)
         st.write(f"Selected Algorithm: {selected_option}")
         st.write(f"Epsilon (eps): {eps}")
         st.write(f"Minimum Samples: {min_samples}")
+        scaled_df,df,cluster_data=preprocessing()
+        dbscan(df, eps, min_samples)
         # Call function to run DBSCAN algorithm with selected parameters
 
     elif selected_option == "Hierarchical":
@@ -135,12 +199,7 @@ with col1:
         # Display the selected option
         st.write("You selected:", selected_option)
 
-        progress_bar = st.progress(0)
 
-        # Simulate a task that takes time
-    for percent_complete in range(101):
-            time.sleep(0.05)  # Simulate a delay
-            progress_bar.progress(percent_complete)
 
     with col2:
         st.write("Model Performance")
