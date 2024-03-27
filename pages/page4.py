@@ -226,43 +226,49 @@ def dbscan(df, best_eps, best_min_samples):
     davies_bouldin = metrics.davies_bouldin_score(df, labels_dB)
     calinski_harabasz = metrics.calinski_harabasz_score(df,labels_dB)
 
-    # Define plot configurations
-    plot_config = [
-        ('Schizophrenia', 'Depressive'),
-        ('Depressive', 'Anxiety'),
-        ('Anxiety', 'Bipolar'),
-        ('Bipolar', 'Eating'),
-        ('Eating', 'Schizophrenia')
-    ]
+    # # Define plot configurations
+    # plot_config = [
+    #     ('Schizophrenia', 'Depressive'),
+    #     ('Depressive', 'Anxiety'),
+    #     ('Anxiety', 'Bipolar'),
+    #     ('Bipolar', 'Eating'),
+    #     ('Eating', 'Schizophrenia')
+    # ]
 
-    # Create subplots
-    fig = make_subplots(rows=5, cols=2, subplot_titles=[
-        'Schizophrenia vs Depressive Without Clustering', 'Schizophrenia vs Depressive With Clustering',
-        'Depressive vs Anxiety Without Clustering', 'Depressive vs Anxiety With Clustering',
-        'Anxiety vs Bipolar Without Clustering', 'Anxiety vs Bipolar With Clustering',
-        'Bipolar vs Eating Without Clustering', 'Bipolar vs Eating With Clustering',
-        'Eating vs Schizophrenia Without Clustering', 'Eating vs Schizophrenia With Clustering'
-    ])
+    # # Create subplots
+    # fig = make_subplots(rows=5, cols=2, subplot_titles=[
+    #     'Schizophrenia vs Depressive Without Clustering', 'Schizophrenia vs Depressive With Clustering',
+    #     'Depressive vs Anxiety Without Clustering', 'Depressive vs Anxiety With Clustering',
+    #     'Anxiety vs Bipolar Without Clustering', 'Anxiety vs Bipolar With Clustering',
+    #     'Bipolar vs Eating Without Clustering', 'Bipolar vs Eating With Clustering',
+    #     'Eating vs Schizophrenia Without Clustering', 'Eating vs Schizophrenia With Clustering'
+    # ])
 
-    # Plotting
-    for i, (x, y) in enumerate(plot_config, start=1):
-        # Without clustering
-        fig.add_trace(
-            go.Scatter(x=df[x], y=df[y], mode='markers', name=f'{x} vs {y} Without Clustering'),
-            row=i, col=1
-        )
-        # With clustering
-        fig.add_trace(
-            go.Scatter(x=df[x], y=df[y], mode='markers', name=f'{x} vs {y} With Clustering',
-                       marker=dict(color=labels_dB),
-                       text=df['DBCluster'].apply(lambda label: f'Cluster: {label}')),
-            row=i, col=2
-        )
+    # # Plotting
+    # for i, (x, y) in enumerate(plot_config, start=1):
+    #     # Without clustering
+    #     fig.add_trace(
+    #         go.Scatter(x=df[x], y=df[y], mode='markers', name=f'{x} vs {y} Without Clustering'),
+    #         row=i, col=1
+    #     )
+    #     # With clustering
+    #     fig.add_trace(
+    #         go.Scatter(x=df[x], y=df[y], mode='markers', name=f'{x} vs {y} With Clustering',
+    #                    marker=dict(color=labels_dB),
+    #                    text=df['DBCluster'].apply(lambda label: f'Cluster: {label}')),
+    #         row=i, col=2
+    #     )
 
-    # Update layout
-    fig.update_layout(height=1500, width=1000, showlegend=False, title_text='DBSCAN Clustering Plots')
-
-    # Show the figure
+    # # Update layout
+    # fig.update_layout(height=1500, width=1000, showlegend=False, title_text='DBSCAN Clustering Plots')
+    x_variable = st.selectbox('Select X Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=0)
+    y_variable = st.selectbox('Select Y Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=1)
+ 
+ 
+    # Display the clustered data interactively using Plotly Express
+    st.subheader('Clustered Data Visualization')
+    fig = px.scatter(df, x=x_variable, y=y_variable, color='DBCluster', title=f'{x_variable} vs {y_variable}', height=600)
+    
     st.plotly_chart(fig)
     return silhouette,davies_bouldin,calinski_harabasz
 
