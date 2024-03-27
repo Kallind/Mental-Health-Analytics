@@ -12,7 +12,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings("ignore")
-from sklearn.cluster import DBSCAN, AgglomerativeClustering, KMeans
+from sklearn.cluster import DBSCAN, AgglomerativeClustering, KMeans, dbscan
 import plotly.express as px
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -25,6 +25,27 @@ st.set_page_config(layout="wide",initial_sidebar_state="collapsed")
 st.title("Data Modelling")
 
 col1, col2 = st.columns(2)
+# def kmeans(scaled_data,df,cluster_data):
+#     # elbow plot
+#     inertia = []
+#     for i in range(1, 11):
+#         kmeans = KMeans(n_clusters=i, random_state=42)
+#         kmeans.fit(scaled_data)
+#         inertia.append(kmeans.inertia_)
+
+
+#     # Plotting the elbow plot with plotly
+#     fig = px.line(x=range(1, 11), y=inertia, title='Elbow Plot', labels={'x': 'Number of Clusters', 'y': 'Inertia'})
+#     st.plotly_chart(fig)
+
+#     kmeans = KMeans(n_clusters=4, random_state=0)
+#     df['Cluster'] = kmeans.fit_predict(cluster_data)
+
+#     df1 = df.reset_index()
+#     # Displaying the clustered data interactively using Plotly Express
+#     fig1 = px.scatter(df1, x='Schizophrenia', y='Depressive', color='Cluster', title='Schizophrenia vs Depressive', height=600, hover_data=['Code'])
+#     st.plotly_chart(fig1)
+
 def kmeans(scaled_data,df,cluster_data,k):
     # elbow plot
     inertia = []
@@ -32,15 +53,15 @@ def kmeans(scaled_data,df,cluster_data,k):
         kmeans = KMeans(n_clusters=i, random_state=42)
         kmeans.fit(scaled_data)
         inertia.append(kmeans.inertia_)
-
-
+ 
+ 
     # Plotting the elbow plot with plotly
     fig = px.line(x=range(1, 11), y=inertia, title='Elbow Plot', labels={'x': 'Number of Clusters', 'y': 'Inertia'})
     st.plotly_chart(fig)
-
+ 
     kmeans = KMeans(n_clusters=k, random_state=0)
     df['Cluster'] = kmeans.fit_predict(cluster_data)
-
+ 
     x_variable = st.selectbox('Select X Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=0)
     y_variable = st.selectbox('Select Y Variable:', options=['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating'], index=1)
  
@@ -107,18 +128,13 @@ def hierarchical_clustering(df):
     st.plotly_chart(fig)
 
 
-    #   DBSCAN
- 
+##DBScan
 def dbscan(df, best_eps, best_min_samples):
-    # Scale the data
-    scaler = StandardScaler()
-    scaled_data = scaler.fit_transform(df)
- 
     # Perform DBSCAN clustering
     dbscan = DBSCAN(eps=best_eps, min_samples=best_min_samples)
-    df['DBCluster'] = dbscan.fit_predict(scaled_data)
+    df['DBCluster'] = dbscan.fit_predict(df)
     labels_dB = df['DBCluster'].values
- 
+
     # Define plot configurations
     plot_config = [
         ('Schizophrenia', 'Depressive'),
@@ -127,7 +143,7 @@ def dbscan(df, best_eps, best_min_samples):
         ('Bipolar', 'Eating'),
         ('Eating', 'Schizophrenia')
     ]
- 
+
     # Create subplots
     fig = make_subplots(rows=5, cols=2, subplot_titles=[
         'Schizophrenia vs Depressive Without Clustering', 'Schizophrenia vs Depressive With Clustering',
@@ -136,7 +152,7 @@ def dbscan(df, best_eps, best_min_samples):
         'Bipolar vs Eating Without Clustering', 'Bipolar vs Eating With Clustering',
         'Eating vs Schizophrenia Without Clustering', 'Eating vs Schizophrenia With Clustering'
     ])
- 
+
     # Plotting
     for i, (x, y) in enumerate(plot_config, start=1):
         # Without clustering
@@ -146,27 +162,22 @@ def dbscan(df, best_eps, best_min_samples):
         )
         # With clustering
         fig.add_trace(
-            go.Scatter(x=df[x], y=df[y], mode='markers', name=f'{x} vs {y} With Clustering', 
-                       marker=dict(color=labels_dB),hoveron=["Code"]),
+            go.Scatter(x=df[x], y=df[y], mode='markers', name=f'{x} vs {y} With Clustering',
+                       marker=dict(color=labels_dB),
+                       text=df['DBCluster'].apply(lambda label: f'Cluster: {label}')),
             row=i, col=2
         )
- 
+
     # Update layout
     fig.update_layout(height=1500, width=1000, showlegend=False, title_text='DBSCAN Clustering Plots')
- 
+
     # Show the figure
     st.plotly_chart(fig)
- 
-def main():
-    # Load your data here or pass it as an argument to the dbscan function
-    # df = pd.read_csv("your_data.csv")
- 
-    # Create sliders for best_eps and best_min_samples
-    best_eps = st.slider("Select best_eps:", min_value=0.1, max_value=2.0, step=0.1, value=1.0)
-    best_min_samples = st.slider("Select best_min_samples:", min_value=1, max_value=10, step=1, value=5)
- 
-    # Call dbscan function
-    # dbscan(df, best_eps, best_min_samples)
+
+
+    
+
+    
 with col1: 
 
     st.header("Select one from below")
@@ -178,8 +189,8 @@ with col1:
     selected_option = st.selectbox("Select an option:", options)
 
     if selected_option == "KMeans":
-        k = st.slider("Number of clusters (k)", min_value=2, max_value=10, value=3, step=1)
         st.write(f"Selected Algorithm: {selected_option}")
+        k = st.slider("Number of clusters (k)", min_value=2, max_value=10, value=3, step=1)
         st.write(f"Number of Clusters (k): {k}")
         scaled_df,df,cluster_data=preprocessing()
         kmeans(scaled_df,df,cluster_data,k)
