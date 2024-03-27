@@ -14,17 +14,18 @@ import warnings
 warnings.filterwarnings("ignore")
 
 st.set_page_config(layout="wide",initial_sidebar_state="collapsed")
-st.header("Data Visualisation with Data Cleaning")
-st.write("This is the third page. Click the button below to go back to the main page.")
+st.markdown("<h1 style='text-align: center;'>Data Visualisation with Data Cleaning</h1>", unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
+
+
 
 def main1():
     # Load data
     df = pd.read_csv('mental_cleaned.csv')
     df.columns = ['Country', 'Code', 'Year', 'Schizophrenia disorders', 'Depressive disorders', 'Anxiety disorders', 'Bipolar disorder', 'Eating disorders']
     # Streamlit App
-    st.title("Global Mental Health Disorders Prevalence")
+    st.markdown("<div style='text-align: center; font-size: 30px;'>Global Mental Health Disorders Prevalence</div>", unsafe_allow_html=True)
+
     # Select Year
     year_of_interest = st.slider("Select Year", min_value=int(df['Year'].min()), max_value=int(df['Year'].max()), value=2010)
     # Filter data for selected year
@@ -152,6 +153,7 @@ def main2():
         buttons.append(country_buttons)
 
     buttons.sort(key=lambda x: x['label'])  # Sort buttons alphabetically by country name
+    st.markdown("<div style='text-align: center; font-size: 30px;'>Prevalence of Mental Health Disorders Over Time by Country</div>", unsafe_allow_html=True)
 
     # Add dropdown to the figure
     fig.update_layout(showlegend=True,
@@ -159,13 +161,14 @@ def main2():
                                     "x": 0.1, "xanchor": "left", "y": 1.1, "yanchor": "top"}])
 
     # Update layout to add titles and axis labels
-    fig.update_layout(title='Prevalence of Mental Health Disorders Over Time by Country',
+    fig.update_layout(
                       xaxis_title='Year',
                       yaxis_title='Prevalence (%)')
 
     # Display the plot
     st.plotly_chart(fig)
 
+     
 def main3():
     # Select variables of interest
     df= pd.read_csv('mental_cleaned.csv')
@@ -193,19 +196,18 @@ def main3():
     # Plot heatmap
     st.write("### Correlation Matrix")
     plt.figure(figsize=(10, 5), dpi=200)
-    sns.heatmap(Corrmat, annot=True, fmt=".2f", linewidth=.5)
+    xx= sns.heatmap(Corrmat, annot=True, fmt=".2f", linewidth=.5)
     plt.title('Correlation Matrix')
-    st.pyplot()
-
-with col1:
-   main1()
-   main3()
+    st.pyplot(xx.figure)
 
 
-with col2:
-    main2()
-    st.write("This is column 2")
-    st.write("This is the data visualisation page")
+main1()
+main2()
+main3()
+
+
+    
+    
 
 
 if st.button("Modelling Button"):
