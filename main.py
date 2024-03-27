@@ -5,7 +5,7 @@ import os
 
 st.set_page_config(layout="wide",initial_sidebar_state="collapsed")
 st.markdown("<h1 style='text-align: center;'>Mindful Marketing for Mental Wellness</h1>", unsafe_allow_html=True)
-st.markdown("<div style='text-align: center; font-size: 20px;'>Our project focuses on how mental illnesses affect different regions of the country</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; font-size: 20px;'>Our project focuses on how mental illnesses affect different parts of the world</div>", unsafe_allow_html=True)
 
 st.image('https://images.thequint.com/thequint%2F2023-01%2F3b080752-7789-458b-a101-756f2a8ca860%2Fhero_image__1_.jpg?auto=format%2Ccompress&fmt=webp&width=120&w=1200', use_column_width=True)
 def save_uploaded_file(uploadedfile):
