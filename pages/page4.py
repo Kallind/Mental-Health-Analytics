@@ -283,10 +283,6 @@ with col1:
 
         st.write(f"Inference\n {inference}")
 
-    with col2:
-        st.write("Model Performance")
-        st.write("Graphs")
-
     if st.button("Testing Button"):
         switch_page("page5")
 

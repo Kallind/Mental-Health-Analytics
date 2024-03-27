@@ -28,7 +28,7 @@ with col2:
     if uploaded_file is not None:
         file_path = save_uploaded_file(uploaded_file)
         st.success(f"File saved to: {file_path}")
-        if st.button("Data Vsiualization"):
+        if st.button("Data Visualization"):
             switch_page("page2")
 
 
